@@ -1,3 +1,3 @@
-The project describes how Raspberry PI can be interface to FetchIT by triggering IFTTT events.
-
+The project describes how a Raspberry PI can be interfaced
+to one or more FetchIT devices, by triggering IFTTT events.
 
