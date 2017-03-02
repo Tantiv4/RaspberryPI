@@ -3,6 +3,8 @@ from Queue import Queue
 import getopt
 import random
 import sys
+import json
+import os
 import threading
 from coapthon import defines
 from coapthon.client.coap import CoAP
@@ -12,9 +14,6 @@ from coapthon.messages.request import Request
 from coapthon.utils import parse_uri
 import socket
 
-#path = "/home/t4pi12345/test_scripts/FetchIT/scripts/"
-#if path not in sys.path:
-#        sys.path.append(path)
 
 client = None
 
@@ -22,7 +21,6 @@ coap_response = ""
 
 def update_coap_response(response): # pragma: no cover
     coap_response = response
-    #print coap_response
 
 def get_coap_response(): # pragma: no cover
     return coap_response
@@ -70,14 +68,12 @@ def coap_action(message):  # pragma: no cover
     op = None
     path = None
     payload = None
-    #try:
-    #    opts, args = getopt.getopt(sys.argv[1:], "ho:p:P:f:", ["help", "operation=", "path=", "payload=",
-    #                                                           "payload_file="])
-    #except getopt.GetoptError as err:
-        #print help information and exit:
-    #    print str(err)  # will print something like "option -a not recognized"
-    #    usage()
-    #    sys.exit(2)
+    device_id = None
+    device_type  = None
+    Sensor_data  = None
+    log_at        = None
+    payload_sensor = None
+   
     for o, a in message:
         if o in ("-o", "--operation"):
             op = a
@@ -86,8 +82,19 @@ def coap_action(message):  # pragma: no cover
         elif o in ("-P", "--payload"):
             payload = a
         elif o in ("-f", "--payload-file"):
-            with open(a, 'r') as f:
-                payload = f.read()
+          if  os.path.isfile('./a.json'):
+            with open('a.json','r') as f:
+                payload_sensor = json.load(f)
+                f.close
+          else: 
+            usage()
+            sys.exit()
+
+          if os.path.isfile('./b.json'):
+            with open('b.json','r') as f:
+                payload_alarm = json.load(f)
+                f.close
+                print payload_alarm["alarm_type"]
         elif o in ("-h", "--help"):
             usage()
             sys.exit()
@@ -143,16 +150,41 @@ def coap_action(message):  # pragma: no cover
             print "Path cannot be empty for a POST request"
             usage()
             sys.exit(2)
-        if payload is None:
+        if (payload_sensor or payload_alarm) is None:
             print "Payload cannot be empty for a POST request"
             usage()
             sys.exit(2)
-	elif payload == "Passed":
-		payload = "{\"response\":\"Success\",\"result\":\"OK\"}"
-        response = client.post(path, payload)
-        print response.pretty_print()
-	return response.payload
-        client.stop()
+        elif payload_alarm["alarm"] == 1:
+
+             device_id = payload_sensor["device_id"]   
+             Sensor_data = payload_sensor["sensor_data"]
+             device_type  = payload_sensor["sensor_type"]
+             log_at       = payload_sensor["logged_at"]     
+             sensor_payload = "{\"device_id\":\""+device_id+"\",\"sensor_type\":\""+device_type+"\",\"sensor_data\":\""+str(Sensor_data)+"\",\"logged_at\":\""+log_at+"\"}"
+             response = client.post(path, sensor_payload)
+             print response.pretty_print()
+             #return response.payload
+
+             device_id = payload_alarm["device_id"]
+             alarm     = payload_alarm["alarm_type"]
+             log_at    = payload_alarm["alarm_at"]
+             alarm_payloads = "{\"device_id\":\""+device_id+"\",\"alarm_type\":\""+str(alarm)+"\",\"alarm_at\":\""+log_at+"\"}"
+             print alarm_payloads
+             response = client.post(path, alarm_payloads)
+             print response.pretty_print()
+             return response.payload
+	else:
+	     device_id = payload_sensor["device_id"]   
+             Sensor_data = payload_sensor["sensor_data"]
+             device_type  = payload_sensor["sensor_type"]
+             log_at       = payload_sensor["logged_at"]     
+	     sensor_payload = "{\"device_id\":\""+device_id+"\",\"sensor_type\":\""+device_type+"\",\"sensor_data\":\""+str(Sensor_data)+"\",\"logged_at\":\""+log_at+"\"}"
+             print payload
+	     response = client.post(path, sensor_payload)
+             print response.pretty_print()
+	     return response.payload
+
+             client.stop()
     elif op == "PUT":
         if path is None:
             print "Path cannot be empty for a PUT request"
