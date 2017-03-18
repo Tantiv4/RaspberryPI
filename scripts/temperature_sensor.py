@@ -21,7 +21,7 @@ device_folder = glob.glob(base_dir + '10*')[0]
 device_file = device_folder + '/w1_slave'
 
 
-user_temperature = sys.argv[1]
+user_temperature =int(sys.argv[1])
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(17,GPIO.OUT)
@@ -47,11 +47,9 @@ def read_temp():
                 print temp
 		return int(temp_c)
 def raise_alarm():
-    temperature  = read_temp()
-    print temperature
-    print user_temperature
 
-    if user_temperature == temperature:
+    temp_sensor = read_temp()
+    if user_temperature == temp_sensor:
         set_alarm = 1
     else: 
         set_alarm = 0
@@ -59,19 +57,20 @@ def raise_alarm():
 
 def send_ifttt_response(temperature,date_time):
         with open("a.json", "w") as f:
-	        json.dump({'device_id':"rp2",'sensor_type':"0",'sensor_data':temperature, 'logged_at':date_time}, f, indent=0)
+	        json.dump({'device_id':sys.argv[2],'sensor_type':"0",'sensor_data':temperature, 'logged_at':date_time}, f, indent=0)
        # uri_path = "coap://api-dev.tantiv4.com:5683/event/sensor" 
         uri_path = "coap://api.tantiv4.com/event/sensor"
         opts, args = getopt.getopt(['-oPOST', '-p' + uri_path,'-f'+ "f"], 'o:p:f:')
         f.close
         print coap_action(opts)
-        set_alarm = raise_alarm()
-        if set_alarm == 1:
+        set_alarm_1 = raise_alarm()
+        print set_alarm_1
+        if set_alarm_1 == 1:
            send_alarm(raise_alarm(),time.strftime("%c"))
         
 def send_alarm(alarm,date_time):
        with open("b.json","w") as f:
-               json.dump({'device_id':"rp2",'alarm_type':"1",'alarm_at':date_time,"alarm":alarm}, f, indent = 0)
+               json.dump({'device_id':sys.argv[2],'alarm_type':"1",'alarm_at':date_time,"alarm":alarm}, f, indent = 0)
       # uri_alarm_path = "coap://api-dev.tantiv4.com:5683/event/alarm"
        uri_alarm_path = "coap://api.tantiv4.com/event/alarm"
        opts,args = getopt.getopt(['-oPOST','-p'+ uri_alarm_path,'-f'+ "f"],'o:p:f:')
@@ -81,7 +80,7 @@ while True:
         try:
 
                 send_ifttt_response(read_temp(),time.strftime("%c"))
-                send_alarm(time.strftime("%c"))
+               # send_alarm(raise_alarm(),time.strftime("%c"))
                 time.sleep(2)
         except KeyboardInterrupt:
                 try:
