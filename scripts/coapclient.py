@@ -73,6 +73,7 @@ def coap_action(message):  # pragma: no cover
     Sensor_data  = None
     log_at        = None
     payload_sensor = None
+    payload_alarm = None
    
     for o, a in message:
         if o in ("-o", "--operation"):
@@ -146,45 +147,47 @@ def coap_action(message):  # pragma: no cover
 	return response.payload
         client.stop()
     elif op == "POST":
-        if path is None:
-            print "Path cannot be empty for a POST request"
-            usage()
-            sys.exit(2)
-        if (payload_sensor or payload_alarm) is None:
-            print "Payload cannot be empty for a POST request"
-            usage()
-            sys.exit(2)
-        elif payload_alarm["alarm"] == 1:
+		if path is None:
+			print "Path cannot be empty for a POST request"
+			usage()
+			sys.exit(2)
+		if(payload_sensor or payload_alarm) is None:
+			print "Payload cannot be empty for a POST request"
+			usage()
+			sys.exit(2)
+		elif payload_alarm != None:     
 
-             device_id = payload_sensor["device_id"]   
-             Sensor_data = payload_sensor["sensor_data"]
-             device_type  = payload_sensor["sensor_type"]
-             log_at       = payload_sensor["logged_at"]     
-             sensor_payload = "{\"device_id\":\""+device_id+"\",\"sensor_type\":\""+device_type+"\",\"sensor_data\":\""+str(Sensor_data)+"\",\"logged_at\":\""+log_at+"\"}"
-             response = client.post(path, sensor_payload)
-             print response.pretty_print()
-             #return response.payload
+			device_id = payload_sensor["device_id"]   
+			Sensor_data = payload_sensor["sensor_data"]
+			device_type  = payload_sensor["sensor_type"]
+			log_at       = payload_sensor["logged_at"]     
+			sensor_payload = "{\"device_id\":\""+device_id+"\",\"sensor_type\":\""+device_type+"\",\"sensor_data\":\""+str(Sensor_data)+"\",\"logged_at\":\""+log_at+"\"}"
+			response = client.post(path, sensor_payload)
+			print response.pretty_print()
+            #return response.payload
 
-             device_id = payload_alarm["device_id"]
-             alarm     = payload_alarm["alarm_type"]
-             log_at    = payload_alarm["alarm_at"]
-             alarm_payloads = "{\"device_id\":\""+device_id+"\",\"alarm_type\":\""+str(alarm)+"\",\"alarm_at\":\""+log_at+"\"}"
-             print alarm_payloads
-             response = client.post(path, alarm_payloads)
-             print response.pretty_print()
-             return response.payload
-	else:
-	     device_id = payload_sensor["device_id"]   
-             Sensor_data = payload_sensor["sensor_data"]
-             device_type  = payload_sensor["sensor_type"]
-             log_at       = payload_sensor["logged_at"]     
-	     sensor_payload = "{\"device_id\":\""+device_id+"\",\"sensor_type\":\""+device_type+"\",\"sensor_data\":\""+str(Sensor_data)+"\",\"logged_at\":\""+log_at+"\"}"
-             print payload
-	     response = client.post(path, sensor_payload)
-             print response.pretty_print()
-	     return response.payload
+			device_id = payload_alarm["device_id"]
+			alarm     = payload_alarm["alarm_type"]
+			log_at    = payload_alarm["alarm_at"]
+			alarm_payloads = "{\"device_id\":\""+device_id+"\",\"alarm_type\":\""+str(alarm)+"\",\"alarm_at\":\""+log_at+"\"}"
+			print alarm_payloads
+			response = client.post(path, alarm_payloads)
+			print response.pretty_print()
+			os.remove("b.json")
+			return response.payload
+		else:
 
-             client.stop()
+			device_id = payload_sensor["device_id"]   
+			Sensor_data = payload_sensor["sensor_data"]
+			device_type  = payload_sensor["sensor_type"]
+			log_at       = payload_sensor["logged_at"]     
+			sensor_payload = "{\"device_id\":\""+device_id+"\",\"sensor_type\":\""+device_type+"\",\"sensor_data\":\""+str(Sensor_data)+"\",\"logged_at\":\""+log_at+"\"}"
+			print payload
+			response = client.post(path, sensor_payload)
+			print response.pretty_print()
+			return response.payload
+	
+			client.stop()
     elif op == "PUT":
         if path is None:
             print "Path cannot be empty for a PUT request"
