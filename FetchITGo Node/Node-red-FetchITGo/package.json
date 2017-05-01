@@ -1,0 +1,13 @@
+{
+    "name"         : "node-red-contrib-FetchItGOnode",
+    "version"      : "0.0.1",
+    "description"  : "A FetchItGO node for node-red",
+    "dependencies": {
+    },
+    "keywords": [ "node-red" ],
+    "node-red"     : {
+        "nodes": {
+            "FetchItGO": "FetchItGO.js"
+        }
+    }
+}
