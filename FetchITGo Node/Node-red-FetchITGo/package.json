@@ -1,13 +1,19 @@
 {
-    "name"         : "node-red-contrib-FetchItGOnode",
+    "name"         : "node-red-contrib-fetchitgo",
     "version"      : "0.0.1",
     "description"  : "A FetchItGO node for node-red",
-    "dependencies": {
+    "dependencies": {},
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/Tantiv4/RaspberryPI/edit/master/FetchITGo Node/Node-red-FetchITGo"
     },
+    "author": "Aasha",
+    "license": "MIT",
     "keywords": [ "node-red" ],
-    "node-red"     : {
+    "node-red": {
         "nodes": {
             "FetchItGO": "FetchItGO.js"
         }
     }
 }
+
