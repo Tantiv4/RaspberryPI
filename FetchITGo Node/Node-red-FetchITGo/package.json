@@ -1,19 +1,22 @@
 {
-    "name"         : "node-red-contrib-fetchitgo",
-    "version"      : "0.0.1",
-    "description"  : "A FetchItGO node for node-red",
-    "dependencies": {},
-    "repository": {
+  "name": "node-red-contrib-fetchitgo",
+  "version": "0.1.0",
+  "description": "A FetchItGO node for node-red",
+  "dependencies": {},
+  "repository": {
     "type": "git",
-    "url": "https://github.com/Tantiv4/RaspberryPI/edit/master/FetchITGo Node/Node-red-FetchITGo"
-    },
-    "author": "Aasha",
-    "license": "MIT",
-    "keywords": [ "node-red" ],
-    "node-red": {
-        "nodes": {
-            "FetchItGO": "FetchItGO.js"
-        }
-    }
+    "url": "https://github.com/Tantiv4/RaspberryPI/tree/master/FetchITGo Node/"
+  },
+  "author": "Aasha",
+  "license": "MIT",
+  "keywords": [
+    "node-red"
+  ],
+  "node-red": {
+    "nodes": {
+      "FetchItGO": "FetchItGO.js",
+      "FetchItGo": "coap/FetchItGo_request.js"
+      }
+  }
 }
 
