@@ -1,4 +1,3 @@
-
 from __future__ import print_function, unicode_literals
 import sys
 from sys import argv
@@ -6,6 +5,7 @@ from gtts import gTTS
 import os
 import getopt
 import time
+import socket
 import json
 from threading import Thread
 from random import choice
@@ -30,9 +30,19 @@ except ImportError:
 import soco
 
 coap_message = ""
+def get_ip_address():
+     ip_address = '';
+     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+     s.connect(("8.8.8.8",80))
+     ip_address = s.getsockname()[0]
+     s.close()
+     return ip_address
+machine_ip = get_ip_address()
+port = 8000
+
 def text2speech():
 	zone = soco.discover()
-	tts = gTTS(text="hi this is Fetchit, which makes your life, simplified", lang='en')
+	tts = gTTS(text=" This is FetchIT, which makes your life simplified", lang='en')
 	tts.save("hello.mp3")
 
 
@@ -66,7 +76,7 @@ def add_random_file_from_present_folder(machine_ip, port, zone_name):
     print('Looking for music files')
     for path, dirs, files in os.walk('.'):
         for file_ in files:
-            if not os.path.splitext(file_)[1].startswith('.py'):
+            if not ((os.path.splitext(file_)[1].startswith('.py')) or (os.path.splitext(file_)[1].startswith('.json')) or (os.path.splitext(file_)[1].startswith('.js'))or (os.path.splitext(file_)[1].startswith('.conf')) or (os.path.splitext(file_)[1].startswith('.pyc')) or (os.path.splitext(file_)[1].startswith('.py.swp'))):
                 music_files.append(os.path.relpath(os.path.join(path, file_)))
                 print('Found:', music_files[-1])
 
@@ -83,32 +93,29 @@ def add_random_file_from_present_folder(machine_ip, port, zone_name):
         if zone.player_name == zone_name:
             break
     print (zone.player_name)
-    #number_in_queue = zone.add_uri_to_queue(netpath)
-    number_in_queue = 1
-    print (number_in_queue)
-    #zone.play_from_queue(number_in_queue)
-    #print(zone.volume)
-    #zone.volume = argv[2]`
-    #zone.stop()
-    zone.play_uri(netpath,"a")
-    return zone.get_current_track_info()
+    zone.clear_queue()
+    number_in_queue = zone.add_uri_to_queue(netpath)
+    number_in_queue_1 = zone.get_current_track_info()['playlist_position']
+    number_in_queue_1 = int(number_in_queue_1)-1
+    zone.play_from_queue(int(number_in_queue_1))
+    #return zone.get_current_track_info()
 
 def play_text(message):
     # Settings
-    if message.find("OK"):
+    if message.find("OK") != -1:
          response = json.loads(message)
          #print response
          action_str = response["response"]
          print (action_str)
          if action_str["status"] == "1":
             text2speech()
-            machine_ip = '192.168.0.120'
-            port = 8000
+           # machine_ip = '192.168.0.104'
+           # port = 8000
             zone_name = 'Stue'  # Danish for living room
             # Setup and start the http server
-            server = HttpServer(port)
-            server.start()
-
+            #server = HttpServer(port)
+            #server.start()
+            
             # When the http server is setup you can really add your files in
             # any way that is desired. The source code for
             # add_random_file_from_present_folder is just an example, but it may be
@@ -117,10 +124,13 @@ def play_text(message):
 
             # Remember the http server runs in its own daemonized thread, so it is
             # necessary to keep the main thread alive. So sleep for 3 years.
-            #time.sleep(10**8)
+            #time.sleep(300)
+             #server.stop()
+            
          else:
             print ("No Action trigger")
-
+    else: 
+         print ("no action trigger")
 # get response from ifttt and perform required action
 try:
         opts, args = getopt.getopt(sys.argv[1:], "ho:p:P:f:", ["help", "operation=", "path=", "payload=",
@@ -130,23 +140,28 @@ except getopt.GetoptError as err:
         print (str(err))  # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
-while True:
+def main():
+    server = HttpServer(port)
+    server.start()
+   
+    while True:
             try:
-                request_status = 1;
-                coap_message = coap_action(opts)
-                #get()
-                print (coap_message)
-                play_text(coap_message)
-                #coap_message = ""
-                #put()
-                time.sleep(5)
+                 request_status = 1;
+                 coap_message = coap_action(opts)
+                 print (coap_message)
+                 play_text(coap_message)
+                 time.sleep(5)
+                
             except KeyboardInterrupt:
                 try:
+                        server.stop()
                         print (os.system("killall node"))
                 except OSError as er:
                         print (er)
                 print ("Exit FetchIT")
                 sys.exit(0)
-		server.stop()
+		
     
+
+main()
 
