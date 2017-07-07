@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-fetchitgo",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "description": "A FetchItGO node for node-red",
   "dependencies": {},
   "repository": {
@@ -14,8 +14,7 @@
   ],
   "node-red": {
     "nodes": {
-      "FetchItGO": "FetchItGO.js",
-      "FetchItGo": "coap/FetchItGo_request.js"
+      "FetchItGO": "FetchItGO.js"
     }
   }
 }
